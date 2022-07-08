@@ -6,6 +6,8 @@
 #include "DataController.h"
 #include <string>
 
+#define MYMSG WM_USER+1
+
 
 using namespace std;
 
@@ -34,10 +36,10 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	DECLARE_MESSAGE_MAP()
-	DataController DC;
+	DECLARE_MESSAGE_MAP()	
 public:
-	
+
+	DataController DC;	
 	CListCtrl m_list;
 	afx_msg void OnBnClickedButtonload();
 	CString m_keyword;
@@ -47,4 +49,6 @@ public:
 	afx_msg void OnDestroy();
 	CListCtrl m_listSubTotal;
 	void SetListSubTotal(int* subTotal);
+protected:
+	afx_msg LRESULT OnMymsg(WPARAM wParam, LPARAM lParam);
 };

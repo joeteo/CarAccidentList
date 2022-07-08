@@ -78,6 +78,7 @@ BEGIN_MESSAGE_MAP(CCarAccidentListDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTONSEARCH, &CCarAccidentListDlg::OnBnClickedButtonsearch)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST2, &CCarAccidentListDlg::OnLvnItemchangedList2)
 	ON_WM_DESTROY()
+	ON_MESSAGE(MYMSG, &CCarAccidentListDlg::OnMymsg)
 END_MESSAGE_MAP()
 
 
@@ -203,33 +204,20 @@ HCURSOR CCarAccidentListDlg::OnQueryDragIcon()
 }
 
 
+UINT Load(LPVOID LpData)
+{
+
+	CCarAccidentListDlg* target = (CCarAccidentListDlg*)(LpData);
+	target->DC.loadListFromFile();
+	//LPARAM temp = (LPARAM)(target);
+	SendMessage(target->m_hWnd, MYMSG, NULL, NULL);
+	return 0;
+}
 
 void CCarAccidentListDlg::OnBnClickedButtonload()
 {
-	DC.loadListFromFile();
-	
-
-	CString str;
-
-	m_list.DeleteAllItems();
-
-	for(int i = 0; i < (int)DC.getList().size(); i++)
-	{
-		str.Format(_T("%d"), i + 1);
-		m_list.InsertItem(i, str);
-		m_list.SetItem(i, 1, LVIF_TEXT, DC.getList().at(i)->GetSiDo(), NULL, NULL, NULL, NULL);
-		m_list.SetItem(i, 2, LVIF_TEXT, DC.getList().at(i)->GetSiGunGoo(), NULL, NULL, NULL, NULL);
-
-
-		for(int j=0; j < LOCATION_NUMBER; j++)
-		{
-			str.Format(_T("%d"), DC.getList().at(i)->GetAccidentCount(j));
-			m_list.SetItem(i, j+3, LVIF_TEXT, str, NULL, NULL, NULL, NULL);
-		}
-	}
-	
-	UpdateData(false);
-	
+	AfxBeginThread(Load, (LPVOID)this);		
+	UpdateData(false);	
 }
 
 
@@ -253,8 +241,7 @@ void CCarAccidentListDlg::OnBnClickedButtonsearch()
 	child.SetParentPtr(this);
 	child.SetListControl(&searchedRows);
 
-	child.DoModal();
-	
+	child.DoModal();	
 
 	m_keyword = "";
 
@@ -297,4 +284,31 @@ void CCarAccidentListDlg::SetListSubTotal(int* subTotal)
 		str.Format(_T("%d"), subTotal[i]);
 		m_listSubTotal.SetItem(0, i+1, LVIF_TEXT, str, NULL, NULL, NULL, NULL);
 	}
+}
+
+
+
+
+afx_msg LRESULT CCarAccidentListDlg::OnMymsg(WPARAM wParam, LPARAM lParam)
+{
+
+	CString str;
+	m_list.DeleteAllItems();
+
+	for (int i = 0; i < (int)DC.getList().size(); i++)
+	{
+		str.Format(_T("%d"), i + 1);
+		m_list.InsertItem(i, str);
+		m_list.SetItem(i, 1, LVIF_TEXT, DC.getList().at(i)->GetSiDo(), NULL, NULL, NULL, NULL);
+		m_list.SetItem(i, 2, LVIF_TEXT, DC.getList().at(i)->GetSiGunGoo(), NULL, NULL, NULL, NULL);
+
+
+		for (int j = 0; j < LOCATION_NUMBER; j++)
+		{
+			str.Format(_T("%d"), DC.getList().at(i)->GetAccidentCount(j));
+			m_list.SetItem(i, j + 3, LVIF_TEXT, str, NULL, NULL, NULL, NULL);
+		}
+	}
+	
+	return 0;
 }
